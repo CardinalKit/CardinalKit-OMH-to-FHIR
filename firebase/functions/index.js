@@ -4,11 +4,11 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 const db = admin.firestore();
-const { dictionaryConcepMap } = require("./Dictionarys/dictionaryConceptMap");
-const { dictionaryAppleMap } = require("./Dictionarys/dictionaryAppleCodesMap");
+const { dictionaryConcepMap } = require("./dictionaries/dictionaryConceptMap");
+const { dictionaryAppleMap } = require("./dictionaries/dictionaryAppleCodesMap");
 const {
   dictionaryLonicCodesMap,
-} = require("./Dictionarys/dictionaryLonicCodesMap");
+} = require("./dictionaries/dictionaryLoincCodesMap");
 const { user } = require("firebase-functions/lib/providers/auth");
 
 
