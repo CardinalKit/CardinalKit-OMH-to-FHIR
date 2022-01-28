@@ -4,15 +4,15 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 const db = admin.firestore();
-const { dictionaryConcepMap } = require("./dictionaries/dictionaryConceptMap");
+const { dictionaryConceptMap } = require("./dictionaries/dictionaryConceptMap");
 const { dictionaryAppleMap } = require("./dictionaries/dictionaryAppleCodesMap");
 const {
-  dictionaryLonicCodesMap,
+  dictionaryLoincCodesMap,
 } = require("./dictionaries/dictionaryLoincCodesMap");
 const { user } = require("firebase-functions/lib/providers/auth");
 
 
-/** String Prototype to transform CammelCase in text with spaces  */
+/** String prototype to transform camelCase in text with spaces  */
 String.prototype.formatUnicorn =
   String.prototype.formatUnicorn ||
   function () {
@@ -205,8 +205,8 @@ class transformRule {
           let idInput = _.get(dictInput, this.keyInput);
           switch (this.tableName) {
             case "concept":
-              if (_.hasIn(dictionaryConcepMap, idInput)) {
-                _.set(dictOutput, this.keyOutput, dictionaryConcepMap[idInput]);
+              if (_.hasIn(dictionaryConceptMap, idInput)) {
+                _.set(dictOutput, this.keyOutput, dictionaryConceptMap[idInput]);
               }
               break;
             case "appleCodes":
@@ -214,12 +214,12 @@ class transformRule {
                 _.set(dictOutput, this.keyOutput, dictionaryAppleMap[idInput]);
               }
               break;
-            case "lonic":
-              if (_.hasIn(dictionaryLonicCodesMap, idInput)) {
+            case "loinc":
+              if (_.hasIn(dictionaryLoincCodesMap, idInput)) {
                 _.set(
                   dictOutput,
                   this.keyOutput,
-                  dictionaryLonicCodesMap[idInput]
+                  dictionaryLoincCodesMap[idInput]
                 );
               }
               break;
@@ -418,7 +418,7 @@ let items = [
   transformRule.ohmFhirMappingTable(
     "header.schema_id.name",
     "code.coding[0]",
-    "lonic"
+    "loinc"
   ),
 
   transformRule.concatenation(
@@ -946,7 +946,8 @@ let items = [
     "component[0].valueString"
   ),
 
-  //supplemental_oxygen_flow_rate
+  //Supplemental oxygen flow rate
+
   transformRule.addMultipleValueIfHasKey("body.supplemental_oxygen_flow_rate", {
     "component[0].code.coding[4].code": "3151-8",
     "component[0].code.coding[4].system": "http://loinc.org",
@@ -971,7 +972,7 @@ let items = [
     "l/min"
   ),
 
-  //body posture
+  //Body posture
 
   transformRule.addMultipleValueIfHasKey("body.body_posture", {
     "component[0].code.coding[5].code": "271605009",
@@ -989,7 +990,7 @@ let items = [
     "component[0].valueCodeableConcept.text"
   ),
 
-  //diastolic blood pressure
+  //Diastolic blood pressure
   transformRule.addMultipleValueIfHasKey("body.diastolic_blood_pressure", {
     "component[0].code.coding[6].code": "8462-4",
     "component[0].code.coding[6].system": "http://loinc.org",
@@ -1014,7 +1015,7 @@ let items = [
     "mm[Hg]"
   ),
 
-  //sistolic  blood pressure
+  //Systolic blood pressure
   transformRule.addMultipleValueIfHasKey("body.systolic_blood_pressure", {
     "component[0].code.coding[7].code": "8480-6",
     "component[0].code.coding[7].system": "http://loinc.org",
@@ -1039,7 +1040,7 @@ let items = [
     "mm[Hg]"
   ),
 
-  //activity Name
+  //Activity name
   transformRule.addMultipleValueIfHasKey("body.activity_name", {
     "component[0].code.coding[8].code": "257733005",
     "component[0].code.coding[8].system": "http://snomed.info/sct",
@@ -1055,7 +1056,7 @@ let items = [
 ];
 
 
-/** Send FhirFormat to firebase */
+/** Send FHIR formatted data to Cloud Firestore */
 async function sendToFirestore(studyId, userId, recordId, data) {
   await db.doc(
     `studies/${studyId}` + `/users/${userId}` + `/healthFhir/${recordId}`
@@ -1063,7 +1064,7 @@ async function sendToFirestore(studyId, userId, recordId, data) {
 }
 
 
-/** Firebase function to transform string date into firebase timestamp */
+/** Firebase function to transform string date into Firebase timestamp */
 exports.updateHour = functions.firestore
 .document("/studies/{studyId}/users/{userId}/healthKit/{healthId}")
 .onUpdate(async(change,context)=>{
@@ -1089,7 +1090,7 @@ exports.updateHour = functions.firestore
   }
 })
 
-/** Firebase function to transform ohm Format to FHIR format */
+/** Firebase function to transform data in Open mHealth format to FHIR format */
 exports.omhToFhir = functions.firestore
   .document("/studies/{studyId}/users/{userId}/healthKit/{healthId}")
   .onCreate( async(snapshot, context) => {
@@ -1148,40 +1149,4 @@ exports.omhToFhir = functions.firestore
       },
       { merge: true }
     );
-  });
-
-
-/** Firebase function to create user roles  on firebase*/
-exports.createUserRol = functions.firestore
-  .document("/studies/{studyId}/users/{userId}")
-  .onCreate(async (snapshot, context) => {
-    await db.doc(`users_roles/${context.params.userId}`)
-      .get()
-      .then((userInfo) => {
-        if (!userInfo.exists) {
-          db.doc(`users_roles/${context.params.userId}`).set({
-            rol: "user",
-            studies: [`${context.params.studyId}`],
-          });
-        }
-      });
-  });
-
-  /** Firebase function to add user email in firestore records*/
-exports.addUserEmail = functions.firestore
-  .document("/studies/{studyId}/users/{userId}")
-  .onCreate((snapshot, context) => {
-    admin
-      .auth()
-      .getUser(context.params.userId)
-      .then((userRecord) => {
-        db.doc(
-          `/studies/${context.params.studyId}/users/${context.params.userId}`
-        ).set(
-          {
-            name: `${userRecord.email}`,
-          },
-          { merge: true }
-        );
-      });
   });
