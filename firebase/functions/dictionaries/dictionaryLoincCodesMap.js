@@ -1,5 +1,6 @@
-/** Dictionary to mapping apple codes into Fhir Format with ionic system*/
-exports.dictionaryLonicCodesMap = {
+/** This dictionary maps HealthKit Data Types (https://developer.apple.com/documentation/healthkit/data_types) to LOINC codes. */
+
+exports.dictionaryLoincCodesMap = {
     "HKCharacteristicTypeIdentifierBiologicalSex":{	
         code: "76689-9"	, 
         display:"Sex assigned at birth", 
