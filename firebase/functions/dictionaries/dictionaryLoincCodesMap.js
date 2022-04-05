@@ -42,8 +42,8 @@ exports.dictionaryLoincCodesMap = {
         system:"http://loinc.org"
     },
     "HKQuantityTypeIdentifierWaistCircumference":{	
-        code: "8281-8"	, 
-        display:"Waist Circumference at umbilicus by US", 
+        code: "8280-0"	, 
+        display:"Waist Circumference at umbilicus by Tape measure", 
         system:"http://loinc.org"
     },
     "HKQuantityTypeIdentifierStepCount":{	
